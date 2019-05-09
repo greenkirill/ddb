@@ -19,7 +19,10 @@ namespace msg.client {
             Port = port;
             client = new Socket(IpAddress.AddressFamily,
                 SocketType.Stream, ProtocolType.Tcp);
+            bh = new BlockHelper(client);
         }
+
+        private BlockHelper bh;
 
         public delegate string TokenEvent(Token token);
         public event TokenEvent TokenRecived;
@@ -55,19 +58,16 @@ namespace msg.client {
 
         public void Registration(string username, string password) {
             var rb = new RegisterBlock(username, password);
-            Send(rb);
+            bh.Send(rb);
         }
         public void Auth(string username, string password) {
             var rb = new AuthBlock(username, password);
-            Send(rb);
+            bh.Send(rb);
         }
 
-        public void Send(IBlock filePiece, bool wait = true) {
-            client.Send(filePiece.GetBytes());
-        }
 
         public async Task Recieve() {
-            var header = RecieveHead();
+            var header = bh.RecieveHead();
             // bool tokenRecieved = false;
             while ((header.type != 0 || header.size != 0) && header.type != BlockTypeConstants.ENDConnect) {
                 switch (header.type) {
@@ -76,7 +76,7 @@ namespace msg.client {
                     default:
                         return;
                 }
-                header = RecieveHead();
+                header = bh.RecieveHead();
             }
         }
 
@@ -87,31 +87,10 @@ namespace msg.client {
                 return null;
             return buffer;
         }
-        private (byte type, int size) RecieveHead() {
-            var idBuffer = new byte[1];
-            var idL = client.Receive(idBuffer);
-            if (idL <= 0)
-                throw new Exception("expected id (1 byte)");
-            var sizeBuffer = new byte[4];
-            var sizeL = client.Receive(sizeBuffer);
-            if (sizeL <= 0)
-                throw new Exception("expected piece size (8 bytes)");
-            return (idBuffer[0], BitConverter.ToInt32(sizeBuffer, 0));
-        }
 
         public void RecieveToken(int size) {
-            var tBlock = RecieveBlock(size, new TokenBlock());
+            var tBlock = bh.RecieveBlock(size, new TokenBlock());
             TokenRecived.Invoke(tBlock.Token);
-        }
-
-        public X RecieveBlock<X>(int size, X lBlock) where X : IBlock {
-            lBlock.SetSize(size);
-            var buffer = new byte[size];
-            var l = client.Receive(buffer);
-            if (l <= 0)
-                throw new Exception($"expected fileSizePiece ({size} bytes)");
-            lBlock.SetBody(buffer);
-            return lBlock;
         }
     }
 

@@ -10,12 +10,13 @@ namespace msg.server {
 
             listener = new Socket(AddressFamily.InterNetwork,
                 SocketType.Stream, ProtocolType.Tcp);
+            Messenger = new Messenger();
         }
 
         public int Port { get; }
 
         private Socket listener;
-
+        private Messenger Messenger;
         public ManualResetEvent allDone = new ManualResetEvent(false);
         public void listen() {
             IPEndPoint localEP = new IPEndPoint(IPAddress.Any, Port);
@@ -48,7 +49,7 @@ namespace msg.server {
                 Socket listener = (Socket)ar.AsyncState;
                 Socket handler = listener.EndAccept(ar);
                 
-                
+                Messenger.CreateNewSession(listener);
 
                 handler.Shutdown(SocketShutdown.Both);
                 handler.Close();

@@ -6,7 +6,8 @@ namespace msg.server
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Hello World!");
+            var server = new Server(2121);
+            server.listen();
         }
     }
 }
