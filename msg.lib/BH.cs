@@ -22,7 +22,7 @@ namespace msg.lib {
             var idBuffer = new byte[1];
             var idL = client.Receive(idBuffer);
             if (idL <= 0)
-                throw new Exception("expected id (1 byte)");
+                return (1, -1);
             var sizeBuffer = new byte[4];
             var sizeL = client.Receive(sizeBuffer);
             if (sizeL <= 0)

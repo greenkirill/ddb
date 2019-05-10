@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using msg.lib;
 
@@ -22,15 +23,23 @@ namespace msg.client {
             bh = new BlockHelper(client);
         }
 
-        
+
         public delegate void ProfileEvent(Profile Profile);
         public event ProfileEvent ProfileRecieved;
+        public delegate void UserListEvent(List<Profile> Profiles);
+        public event UserListEvent UserListRecieved;
+        public delegate void DialogueListEvent(List<Dialogue> Dialogues);
+        public event DialogueListEvent DialogueListRecieved;
+        public delegate void MsgListEvent(List<Message> Messages);
+        public event MsgListEvent MsgListRecieved;
+        public delegate void MsgEvent(Message Message);
+        public event MsgEvent MsgRecieved;
 
         private BlockHelper bh;
 
         public string Hostname { get; }
         public int Port { get; }
-        private Socket client { get; }
+        private Socket client { get; set; }
         public IPHostEntry IpHostInfo { get; }
         public IPAddress IpAddress {
             get {
@@ -50,7 +59,8 @@ namespace msg.client {
         public void Start() {
             IPEndPoint remoteEP = new IPEndPoint(IpAddress, Port);
             client.Connect(remoteEP);
-            recieveTask = Recieve();
+            recieveTask = new Task(Recieve);
+            recieveTask.Start();
         }
 
         public void Dispose() {
@@ -64,22 +74,81 @@ namespace msg.client {
         public void Auth(string username, string password) {
             var rb = new AuthBlock(username, password);
             bh.Send(rb);
+            RecieveOneBlock();
+        }
+        public void RUserList() {
+            var rb = new RequestUserListBlock();
+            bh.Send(rb);
+            RecieveOneBlock();
+        }
+        public void RDialogueList() {
+            var rb = new RequestDialogueList();
+            bh.Send(rb);
+        }
+        public void DialogueCreate(List<string> users) {
+            var rb = new DialogueCreateBlock(users);
+            bh.Send(rb);
+        }
+
+        private void RERAN() {
+            client.Close();
+            client = new Socket(IpAddress.AddressFamily,
+                            SocketType.Stream, ProtocolType.Tcp);
+            bh = new BlockHelper(client);
+            IPEndPoint remoteEP = new IPEndPoint(IpAddress, Port);
+            client.Connect(remoteEP);
+            recieveTask.Dispose();
+            recieveTask = new Task(Recieve);
+            recieveTask.Start();
         }
 
 
-        public async Task Recieve() {
-            var header = bh.RecieveHead();
-            // bool tokenRecieved = false;
-            while ((header.type != 0 || header.size != 0) && header.type != BlockTypeConstants.ENDConnect) {
-                switch (header.type) {
-                    case BlockTypeConstants.ErrorBlock:
-                        break;
-                    case BlockTypeConstants.ProfileBlock:
-                        break;
-                    default:
-                        return;
+        public void RecieveOneBlock() {
+            // var header = bh.RecieveHead();
+            // switch (header.type) {
+            //     case BlockTypeConstants.ErrorBlock:
+            //         break;
+            //     case BlockTypeConstants.ProfileBlock:
+            //         RecieveProfile(header.size);
+            //         break;
+            //     case BlockTypeConstants.UserListBlock:
+            //         RecieveUserList(header.size);
+            //         break;
+            //     case BlockTypeConstants.DialogueListBlock:
+            //         RecievedialogueList(header.size);
+            //         break;
+            //     default:
+            //         return;
+            // }
+        }
+
+        public void Recieve() {
+            try {
+                var header = bh.RecieveHead();
+                while ((header.type != 0 || header.size != 0) && header.type != BlockTypeConstants.ENDConnect) {
+                    switch (header.type) {
+                        case BlockTypeConstants.ErrorBlock:
+                            break;
+                        case BlockTypeConstants.ProfileBlock:
+                            RecieveProfile(header.size);
+                            break;
+                        case BlockTypeConstants.UserListBlock:
+                            RecieveUserList(header.size);
+                            break;
+                        case BlockTypeConstants.DialogueListBlock:
+                            RecievedialogueList(header.size);
+                            break;
+                        default:
+                            return;
+                    }
+                    while ((header = bh.RecieveHead()).size == -1) {
+                        Thread.Sleep(1);
+                    }
                 }
-                header = bh.RecieveHead();
+            } catch (System.Net.Sockets.SocketException e) {
+                RERAN();
+            } catch (Exception e) {
+                Console.WriteLine(e.ToString());
             }
         }
 
@@ -94,6 +163,14 @@ namespace msg.client {
         public void RecieveProfile(int size) {
             var tBlock = bh.RecieveBlock(size, new ProfileBlock());
             ProfileRecieved.Invoke(tBlock.Profile);
+        }
+        public void RecieveUserList(int size) {
+            var tBlock = bh.RecieveBlock(size, new UserListBlock());
+            UserListRecieved.Invoke(tBlock.Users);
+        }
+        public void RecievedialogueList(int size) {
+            var tBlock = bh.RecieveBlock(size, new DialogueListBlock());
+            DialogueListRecieved.Invoke(tBlock.Dialogues);
         }
     }
 

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.EntityFrameworkCore;
 using msg.lib;
 
 namespace msg.server {
@@ -45,8 +46,14 @@ namespace msg.server {
                         select p.Username).ToList();
             }
         }
+        public List<Profile> GetAllProfiles() {
+            using (var context = new ProfileContext()) {
+                return context.Profiles.ToList();
+            }
+        }
 
-        public Dialogue CreateDialogue(List<string> usernames) {
+        public Dialogue CreateDialogue(List<string> usernames, string me) {
+            usernames = usernames.Concat(new List<string> { me }).ToList();
             using (var context = new ProfileContext()) {
                 var profiles = from p in context.Profiles
                                where usernames.Contains(p.Username) select p;
@@ -69,9 +76,15 @@ namespace msg.server {
             var D = new List<Dialogue>();
             foreach (var s in MSGShardsConnectionStrings) {
                 using (var context = MSGContextFactory.CreateDbContext(s)) {
-                    D.Concat(
-                        context.Dialogues.Where(d => d.Members.Any(m => m.ID == id))
-                    );
+                    D = D.Concat(
+                        context.Dialogues.Where(d => d.Members.Any(m => m.ID == id)).Include(x => x.Members)
+                    ).ToList();
+                }
+            }
+
+            foreach (var d in D) {
+                foreach (var m in d.Members) {
+                    m.profile = GetProfileById(m.ID);
                 }
             }
             return D;

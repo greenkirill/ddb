@@ -32,13 +32,22 @@ namespace msg.server {
         public void Start() {
             var header = bh.RecieveHead();
             // bool tokenRecieved = false;
-            while ((header.type != 0 || header.size != 0) && header.type != BlockTypeConstants.ENDConnect) {
+            while (header.type != 0 && header.type != BlockTypeConstants.ENDConnect) {
                 switch (header.type) {
                     case BlockTypeConstants.RegisterBlock:
                         RecieveRegister(header.size);
                         break;
                     case BlockTypeConstants.AuthBlock:
                         RecieveAuth(header.size);
+                        break;
+                    case BlockTypeConstants.RequestUserListBlock:
+                        RecieveRequestUserList(header.size);
+                        break;
+                    case BlockTypeConstants.RequestDialogueListBlock:
+                        RecieveRequestDialogueList(header.size);
+                        break;
+                    case BlockTypeConstants.DialogueCreateBlock:
+                        RecieveDialogueCreate(header.size);
                         break;
                     default:
                         return;
@@ -71,9 +80,32 @@ namespace msg.server {
                 SendProfile(profile);
             }
         }
+        private void RecieveRequestUserList(int size) {
+            var tBlock = bh.RecieveBlock(size, new RequestUserListBlock());
+            var users = mh.GetAllProfiles();
+            SendUserList(users);
+
+        }
+        private void RecieveRequestDialogueList(int size) {
+            var tBlock = bh.RecieveBlock(size, new RequestDialogueList());
+            var ds = mh.GetDialoguesByMemberId(profile.ID);
+            SendDialogueList(ds);
+        }
+        private void RecieveDialogueCreate(int size) {
+            var tBlock = bh.RecieveBlock(size, new DialogueCreateBlock());
+            mh.CreateDialogue(tBlock.Users, profile.Username);
+        }
 
         public void SendProfile(Profile profile) {
             var rb = new ProfileBlock(profile);
+            bh.Send(rb);
+        }
+        public void SendUserList(List<Profile> profiles) {
+            var rb = new UserListBlock(profiles);
+            bh.Send(rb);
+        }
+        public void SendDialogueList(List<Dialogue> dialogues) {
+            var rb = new DialogueListBlock(dialogues);
             bh.Send(rb);
         }
 

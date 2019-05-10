@@ -38,12 +38,15 @@ namespace msg.server {
                                 }
                             }
                         }
-                    } catch (Exception e) { }
+                    } catch (Exception e) {
+                        Console.WriteLine(e);
+                    }
                 }
             }
         }
         public void CloseSession(Guid SessionId) {
             RecheckSession();
+            Console.WriteLine("CLOSE SESSION");
             lock (lockObj) {
                 Sessions = Sessions.FindAll((x) => x.SessionId != SessionId);
             }

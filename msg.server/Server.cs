@@ -48,11 +48,12 @@ namespace msg.server {
 
                 Socket listener = (Socket)ar.AsyncState;
                 Socket handler = listener.EndAccept(ar);
-                
+
                 Messenger.CreateNewSession(handler);
 
                 handler.Shutdown(SocketShutdown.Both);
                 handler.Close();
+                Console.WriteLine("CLSOED");
             } catch (Exception e) {
                 Console.WriteLine(e.ToString());
             }

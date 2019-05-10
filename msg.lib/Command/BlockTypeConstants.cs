@@ -19,6 +19,13 @@ namespace msg.lib
         public const byte ErrorBlock = 8;
         public const byte ProfileBlock = 9;
         public const byte ENDConnect = 255;
+
+        public const byte DialogueCreateBlock = 10;
+        public const byte DialogueListBlock = 11;
+        public const byte RequestDialogueListBlock = 12;
+        public const byte UserListBlock = 13;
+        public const byte RequestUserListBlock = 14;
+        public const byte RequestMsgList = 15;
         //public const byte FileIdPieceType = 31;
         //public const byte NamePieceType = 3;
         //public const byte PieceType = 5;

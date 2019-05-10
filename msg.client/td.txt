@@ -5,10 +5,21 @@ auth USERNAME PASSWORD
 reg USERNAME PASSWORD
 2. Авторизован главное меню
 help
-user list
-dialogue create USERNAME1 USERNAME2 USERNAME3 ... USERNAMEN
-dialogue list
-dialogue join DIALOGUE_NUMBER
+user-list
+dialogue-create USERNAME1 USERNAME2 USERNAME3 ... USERNAMEN
+dialogue-list
+dialogue-open DIALOGUE_NUMBER
 3. В чатике
 просто текст отправлять
 выход в скрин 2 сделать по комбинации
+
+
+DialogueCreateBlock
+# DialogueBlock
+DialogueListBlock
+RequestDialogueListBlock
+UserListBlock
+RequestUserListBlock
+
+SendMsgBlock
+RequestMsgList

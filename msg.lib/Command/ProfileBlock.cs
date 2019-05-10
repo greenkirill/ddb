@@ -6,7 +6,9 @@ using Newtonsoft.Json;
 namespace msg.lib {
     public class ProfileBlock : MetaJson {
         public class ProfileModel {
-            public Profile Profile;
+            public Guid ID;
+            public string Username;
+            public string Password;
         }
 
         public new const byte Type = BlockTypeConstants.ProfileBlock;
@@ -14,17 +16,25 @@ namespace msg.lib {
         public ProfileBlock(Profile Profile) :
             base(
                 new ProfileModel {
-                    Profile = Profile
+                    ID = Profile.ID,
+                    Username = Profile.Username,
+                    Password = Profile.Password
                 }
                 ) { }
-        public ProfileBlock(): base() {    }   
-        
-        public Profile Profile { get {
-            return DJson.Profile;
-        }}
+        public ProfileBlock() : base() { }
+
+        public Profile Profile {
+            get {
+                return new Profile {
+                    ID = DJson.ID,
+                    Username = DJson.Username,
+                    Password = DJson.Password
+                };
+            }
+        }
 
         public override byte[] GetBytes() {
-            return GetBytes(RegisterBlock.Type);
+            return GetBytes(ProfileBlock.Type);
         }
     }
 }
