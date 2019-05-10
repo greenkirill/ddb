@@ -16,7 +16,7 @@ namespace msg.server {
             mh = new MSGHelper(CStrings);
         }
 
-        public void CreateNewSession(Socket client) {
+        public void CreateNewSession(TcpClient client) {
             var session = new MessengerSession(client, mh);
             session.MsgSended += SendMessage;
             session.SessionClosed += CloseSession;
@@ -51,7 +51,7 @@ namespace msg.server {
 
         private void RecheckSession() {
             lock (lockObj) {
-                Sessions = Sessions.FindAll((x) => x.client != null && BlockHelper.SocketConnected(x.client));
+                Sessions = Sessions.FindAll((x) => x.client != null && x.client.Connected);
             }
         }
     }

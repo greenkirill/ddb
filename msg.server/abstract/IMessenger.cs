@@ -4,7 +4,7 @@ using msg.lib;
 
 namespace msg.server {
     public interface IMessenger {
-        void CreateNewSession(Socket client);
+        void CreateNewSession(TcpClient client);
         void SendMessage(Guid SessionId, Message message);
         void CloseSession(Guid SessionId);
     }

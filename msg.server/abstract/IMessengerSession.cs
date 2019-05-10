@@ -7,7 +7,7 @@ namespace msg.server {
     public interface IMessengerSession {
 
         Profile profile { get; }
-        Socket client { get; }
+        TcpClient client { get; }
         Guid SessionId { get; }
         Task StartAsync();
         void Start();

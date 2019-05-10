@@ -3,16 +3,19 @@ using System.Net.Sockets;
 
 namespace msg.lib {
     public class BlockHelper {
-        public BlockHelper(Socket client) {
+        public BlockHelper(TcpClient client) {
             this.client = client;
+            _stream = client.GetStream();
         }
 
-        public Socket client { get; }
+        public TcpClient client { get; }
+        private NetworkStream _stream;
 
         public X RecieveBlock<X>(int size, X lBlock) where X : IBlock {
             lBlock.SetSize(size);
             var buffer = new byte[size];
-            var l = client.Receive(buffer);
+            var l = _stream.Read(buffer);
+            // var l = client.Receive(buffer);
             if (l <= 0)
                 throw new Exception($"expected fileSizePiece ({size} bytes)");
             lBlock.SetBody(buffer);
@@ -20,18 +23,19 @@ namespace msg.lib {
         }
         public (byte type, int size) RecieveHead() {
             var idBuffer = new byte[1];
-            var idL = client.Receive(idBuffer);
+            var idL = _stream.Read(idBuffer);
             if (idL <= 0)
                 throw new Exception("expected id (1 byte)");
             var sizeBuffer = new byte[4];
-            var sizeL = client.Receive(sizeBuffer);
+            var sizeL = _stream.Read(sizeBuffer);
             if (sizeL <= 0)
                 throw new Exception("expected piece size (8 bytes)");
             return (idBuffer[0], BitConverter.ToInt32(sizeBuffer, 0));
         }
 
         public void Send(IBlock filePiece, bool wait = true) {
-            client.Send(filePiece.GetBytes());
+            _stream.Write(filePiece.GetBytes());
+            // client.Send(filePiece.GetBytes());
         }
 
         public static bool SocketConnected(Socket s) {

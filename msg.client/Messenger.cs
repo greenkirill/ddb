@@ -23,6 +23,7 @@ namespace msg.client {
         private Profile Profile;
 
         public void ProfileRecieve(Profile Profile) {
+            Console.WriteLine("dasd");
             this.Profile = Profile;
             ToScreen2();
         }

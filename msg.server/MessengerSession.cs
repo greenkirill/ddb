@@ -15,11 +15,13 @@ namespace msg.server {
         public event CloseSessionEvent SessionClosed;
 
         public Profile profile { get; private set; }
-        public Socket client { get; }
+        public TcpClient client { get; }
+
+
         private BlockHelper bh;
         private MSGHelper mh;
 
-        public MessengerSession(Socket client, MSGHelper mh) {
+        public MessengerSession(TcpClient client, MSGHelper mh) {
             this.client = client;
             bh = new BlockHelper(client);
             this.mh = mh;
@@ -54,7 +56,7 @@ namespace msg.server {
             var tBlock = bh.RecieveBlock(size, new RegisterBlock());
             profile = mh.CreateProfile(tBlock.Username, tBlock.Password);
             if (profile == null) {
-                client.Disconnect(false);
+                client.Close();
                 SessionClosed.Invoke(SessionId);
             } else {
                 SendProfile(profile);
@@ -65,7 +67,7 @@ namespace msg.server {
             var tBlock = bh.RecieveBlock(size, new AuthBlock());
             profile = mh.FindProfile(tBlock.Username, tBlock.Password);
             if (profile == null) {
-                client.Disconnect(false);
+                client.Close();
                 SessionClosed.Invoke(SessionId);
             } else {
                 SendProfile(profile);
