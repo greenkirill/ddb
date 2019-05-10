@@ -1,9 +1,13 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace msg.lib {
     public class Dialogue {
-        public Guid ID;
-        public List<Guid> Members;
+
+        [Key]
+        public Guid ID { get; set; }
+
+        public List<Member> Members { get; set; }
     }
 }

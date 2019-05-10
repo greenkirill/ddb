@@ -1,13 +1,16 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace msg.lib
 {
     public class Profile
     {
-        public Guid ID;
-        public string Username;
-        public string Password;
-        // public List<Token> Token;
+        [Key]
+        public Guid ID { get; set; }
+        [Required]
+        public string Username { get; set; }
+        [Required]
+        public string Password { get; set; }
     }
 }

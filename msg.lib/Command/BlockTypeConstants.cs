@@ -16,7 +16,8 @@ namespace msg.lib
         public const byte ContactListBlock = 5;
         public const byte MsgListBlock = 6;
         public const byte TokenBlock = 7;
-        public const byte ErrorBlock = 7;
+        public const byte ErrorBlock = 8;
+        public const byte ProfileBlock = 9;
         public const byte ENDConnect = 255;
         //public const byte FileIdPieceType = 31;
         //public const byte NamePieceType = 3;

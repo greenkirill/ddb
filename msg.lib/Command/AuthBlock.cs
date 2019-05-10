@@ -26,5 +26,10 @@ namespace msg.lib {
         public string Password { get {
             return DJson.Password;
         }}
+
+        
+        public override byte[] GetBytes() {
+            return GetBytes(AuthBlock.Type);
+        }
     }
 }

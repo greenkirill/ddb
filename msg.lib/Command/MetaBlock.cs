@@ -6,6 +6,7 @@ namespace msg.lib {
     public interface IBlock {
 
         byte[] GetBytes();
+        byte[] GetBytes(byte type);
 
         void SetSize(int size);
 

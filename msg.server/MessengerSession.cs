@@ -3,9 +3,10 @@ using System.Threading;
 using System.Net.Sockets;
 using msg.lib;
 using System.Threading.Tasks;
+using System.Collections.Generic;
 
 namespace msg.server {
-    public class MessengerSession {
+    public class MessengerSession : IMessengerSession {
         public Guid SessionId { get; } = Guid.NewGuid();
 
         public delegate void SendMsgEvent(Guid SessionId, Message message);
@@ -13,14 +14,15 @@ namespace msg.server {
         public delegate void CloseSessionEvent(Guid SessionId);
         public event CloseSessionEvent SessionClosed;
 
-        public Profile profile { get ; private set; }
+        public Profile profile { get; private set; }
         public Socket client { get; }
         private BlockHelper bh;
-        private MHelper mh;
+        private MSGHelper mh;
 
-        public MessengerSession(Socket client) {
+        public MessengerSession(Socket client, MSGHelper mh) {
             this.client = client;
             bh = new BlockHelper(client);
+            this.mh = mh;
         }
 
         public async Task StartAsync() {
@@ -47,13 +49,32 @@ namespace msg.server {
         }
 
 
+
         private void RecieveRegister(int size) {
             var tBlock = bh.RecieveBlock(size, new RegisterBlock());
-            profile = mh.RegisterProfile(tBlock.Username, tBlock.Password);
+            profile = mh.CreateProfile(tBlock.Username, tBlock.Password);
+            if (profile == null) {
+                client.Disconnect(false);
+                SessionClosed.Invoke(SessionId);
+            } else {
+                SendProfile(profile);
+            }
         }
+
         private void RecieveAuth(int size) {
             var tBlock = bh.RecieveBlock(size, new AuthBlock());
-            profile = mh.AuthProfile(tBlock.Username, tBlock.Password);
+            profile = mh.FindProfile(tBlock.Username, tBlock.Password);
+            if (profile == null) {
+                client.Disconnect(false);
+                SessionClosed.Invoke(SessionId);
+            } else {
+                SendProfile(profile);
+            }
+        }
+
+        public void SendProfile(Profile profile) {
+            var rb = new ProfileBlock(profile);
+            bh.Send(rb);
         }
 
         public void SendMsg(Message msg) {

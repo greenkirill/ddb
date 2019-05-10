@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using Newtonsoft.Json;
 
 namespace msg.lib {
     public class RegisterBlock : MetaJson {
@@ -26,5 +27,9 @@ namespace msg.lib {
         public string Password { get {
             return DJson.Password;
         }}
+
+        public override byte[] GetBytes() {
+            return GetBytes(RegisterBlock.Type);
+        }
     }
 }

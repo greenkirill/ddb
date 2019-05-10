@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using msg.lib;
 
 namespace msg.client {
-    class Client : IDisposable {
+    public class Client : IDisposable {
         public class StateObject {
             public Socket workSocket = null;
             public const int BufferSize = 256;
@@ -22,10 +22,11 @@ namespace msg.client {
             bh = new BlockHelper(client);
         }
 
-        private BlockHelper bh;
+        
+        public delegate void ProfileEvent(Profile Profile);
+        public event ProfileEvent ProfileRecieved;
 
-        public delegate string TokenEvent(Token token);
-        public event TokenEvent TokenRecived;
+        private BlockHelper bh;
 
         public string Hostname { get; }
         public int Port { get; }
@@ -73,6 +74,8 @@ namespace msg.client {
                 switch (header.type) {
                     case BlockTypeConstants.ErrorBlock:
                         break;
+                    case BlockTypeConstants.ProfileBlock:
+                        break;
                     default:
                         return;
                 }
@@ -88,9 +91,9 @@ namespace msg.client {
             return buffer;
         }
 
-        public void RecieveToken(int size) {
-            var tBlock = bh.RecieveBlock(size, new TokenBlock());
-            TokenRecived.Invoke(tBlock.Token);
+        public void RecieveProfile(int size) {
+            var tBlock = bh.RecieveBlock(size, new ProfileBlock());
+            ProfileRecieved.Invoke(tBlock.Profile);
         }
     }
 

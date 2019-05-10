@@ -19,8 +19,11 @@ namespace msg.lib {
             Size = Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(DJson)).Length;
         }
         public MetaJson() { }
-        public byte[] GetBytes() {
-            var PieceType_bytes = new byte[] { Type };
+        public virtual byte[] GetBytes() {
+            return GetBytes(Type);
+        }
+        public byte[] GetBytes(byte type) {
+            var PieceType_bytes = new byte[] { type };
             var PieceSize_bytes = BitConverter.GetBytes(Size);
             var jString = JsonConvert.SerializeObject(DJson);
             var Json_bytes = Encoding.UTF8.GetBytes(jString);

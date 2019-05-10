@@ -21,5 +21,9 @@ namespace msg.lib {
         public Message Message { get {
             return DJson.Message;
         }}
+        
+        public override byte[] GetBytes() {
+            return GetBytes(MsgBlock.Type);
+        }
     }
 }

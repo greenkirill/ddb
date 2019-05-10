@@ -4,15 +4,20 @@ using System.Net.Sockets;
 using msg.lib;
 
 namespace msg.server {
-    public class Messenger {
+    public class Messenger : IMessenger {
 
 
-        public List<MessengerSession> Sessions = new List<MessengerSession>();
+        public List<IMessengerSession> Sessions = new List<IMessengerSession>();
 
         private object lockObj = new object();
+        private MSGHelper mh;
+
+        public Messenger(List<string> CStrings) {
+            mh = new MSGHelper(CStrings);
+        }
 
         public void CreateNewSession(Socket client) {
-            var session = new MessengerSession(client);
+            var session = new MessengerSession(client, mh);
             session.MsgSended += SendMessage;
             session.SessionClosed += CloseSession;
             lock (lockObj) {
@@ -27,8 +32,8 @@ namespace msg.server {
                 foreach (var session in Sessions) {
                     try {
                         if (session.SessionId != SessionId) {
-                            foreach (var memberId in message.Dialogue.Members) {
-                                if (session.profile != null && memberId == session.profile.ID) {
+                            foreach (var member in message.Dialogue.Members) {
+                                if (session.profile != null && member.ID == session.profile.ID) {
                                     session.SendMsg(message);
                                 }
                             }
