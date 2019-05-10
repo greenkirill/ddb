@@ -49,6 +49,12 @@ namespace msg.server {
                     case BlockTypeConstants.DialogueCreateBlock:
                         RecieveDialogueCreate(header.size);
                         break;
+                    case BlockTypeConstants.RequestMsgList:
+                        RecieveRequestMsgList(header.size);
+                        break;
+                    case BlockTypeConstants.CSendMsgBlock:
+                        RecieveMsg(header.size);
+                        break;
                     default:
                         return;
                 }
@@ -91,6 +97,16 @@ namespace msg.server {
             var ds = mh.GetDialoguesByMemberId(profile.ID);
             SendDialogueList(ds);
         }
+        private void RecieveRequestMsgList(int size) {
+            var tBlock = bh.RecieveBlock(size, new RequestMsgList());
+            var ds = mh.GetMsgList(tBlock.DialogId, 0, 30);
+            SendMsgList(ds);
+        }
+        private void RecieveMsg(int size) {
+            var tBlock = bh.RecieveBlock(size, new CMsgBlock());
+            var m = mh.SendMessage(tBlock.DialogId, profile.ID, tBlock.text);
+            MsgSended.Invoke(SessionId, m);
+        }
         private void RecieveDialogueCreate(int size) {
             var tBlock = bh.RecieveBlock(size, new DialogueCreateBlock());
             mh.CreateDialogue(tBlock.Users, profile.Username);
@@ -102,6 +118,10 @@ namespace msg.server {
         }
         public void SendUserList(List<Profile> profiles) {
             var rb = new UserListBlock(profiles);
+            bh.Send(rb);
+        }
+        public void SendMsgList(List<Message> msgs) {
+            var rb = new MsgListBlock(msgs);
             bh.Send(rb);
         }
         public void SendDialogueList(List<Dialogue> dialogues) {

@@ -13,6 +13,7 @@ namespace msg.lib
         public const byte AuthBlock = 2;
         public const byte RequestBlock = 3;
         public const byte SendMsgBlock = 4;
+        public const byte CSendMsgBlock = 44;
         public const byte ContactListBlock = 5;
         public const byte MsgListBlock = 6;
         public const byte TokenBlock = 7;

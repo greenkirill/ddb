@@ -92,13 +92,13 @@ namespace msg.server {
 
         public List<Message> GetMsgList(Guid DId, int skip = 0, int take = 10) {
             using (var mContext = GetContextByGuid(DId)) {
-                return mContext.Messages.Where(m => m.Dialogue.ID == DId).OrderByDescending(m => m.SentAt).Skip(skip).Take(take).ToList();
+                return mContext.Messages.Where(m => m.Dialogue.ID == DId).Include(m => m.Dialogue).OrderByDescending(m => m.SentAt).Skip(skip).Take(take).ToList();
             }
         }
 
         public Message SendMessage(Guid DId, Guid MId, string text) {
             using (var context = GetContextByGuid(DId)) {
-                var d = context.Dialogues.Where(D => D.ID == DId).First();
+                var d = context.Dialogues.Where(D => D.ID == DId).Include(x => x.Members).First();
                 var m = new Message {
                     ID = Guid.NewGuid(),
                     SentAt = DateTime.Now,
@@ -108,6 +108,9 @@ namespace msg.server {
                 };
                 context.Messages.Add(m);
                 context.SaveChanges();
+                foreach (var M in m.Dialogue.Members) {
+                    M.profile = GetProfileById(M.ID);
+                }
                 return m;
             }
         }

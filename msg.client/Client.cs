@@ -81,6 +81,16 @@ namespace msg.client {
             bh.Send(rb);
             RecieveOneBlock();
         }
+        public void RMsgList(Guid id) {
+            var rb = new RequestMsgList(id);
+            bh.Send(rb);
+            RecieveOneBlock();
+        }
+
+        public void SendMsg(Guid did, string text) {
+            var rb = new CMsgBlock(did, text);
+            bh.Send(rb);
+        }
         public void RDialogueList() {
             var rb = new RequestDialogueList();
             bh.Send(rb);
@@ -138,6 +148,12 @@ namespace msg.client {
                         case BlockTypeConstants.DialogueListBlock:
                             RecievedialogueList(header.size);
                             break;
+                        case BlockTypeConstants.MsgListBlock:
+                            RecievedMsgList(header.size);
+                            break;
+                        case BlockTypeConstants.SendMsgBlock:
+                            RecievedMsg(header.size);
+                            break;
                         default:
                             return;
                     }
@@ -171,6 +187,14 @@ namespace msg.client {
         public void RecievedialogueList(int size) {
             var tBlock = bh.RecieveBlock(size, new DialogueListBlock());
             DialogueListRecieved.Invoke(tBlock.Dialogues);
+        }
+        public void RecievedMsgList(int size) {
+            var tBlock = bh.RecieveBlock(size, new MsgListBlock());
+            MsgListRecieved.Invoke(tBlock.Messages);
+        }
+        public void RecievedMsg(int size) {
+            var tBlock = bh.RecieveBlock(size, new MsgBlock());
+            MsgRecieved.Invoke(tBlock.Message);
         }
     }
 

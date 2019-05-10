@@ -17,9 +17,9 @@ namespace msg.client {
 
             client.DialogueListRecieved += DialogueListRecieve;
 
-            // client.MsgListRecieved += ProfileRecieve;
+            client.MsgListRecieved += MsgListRecieve;
 
-            // client.MsgRecieved += ProfileRecieve;
+            client.MsgRecieved += MsgRecieve;
 
             clientTask = new Task(client.Start);
             clientTask.Start();
@@ -38,6 +38,8 @@ namespace msg.client {
         private List<Dialogue> Dialogues;
 
         private Guid CurrentDialogueId = Guid.NewGuid();
+
+        private List<Message> CurrentMessages = new List<Message>();
 
 
 
@@ -61,6 +63,19 @@ namespace msg.client {
                 foreach (var u in Dialogues[i].Members)
                     s += $"{u.profile.Username} ";
                 Console.WriteLine(s);
+            }
+        }
+
+        public void MsgListRecieve(List<Message> messages) {
+            CurrentMessages = messages;
+            Screen = 3;
+            RePaintScreen3();
+        }
+
+        public void MsgRecieve(Message message) {
+            if (message.Dialogue.ID == CurrentDialogueId) {
+                CurrentMessages.Add(message);
+                RePaintScreen3();
             }
         }
 
@@ -131,10 +146,18 @@ namespace msg.client {
         }
 
         public void Screen1_Help() {
-            Console.WriteLine("Command list:\nhelp\nauth USERNAME PASSWORD\nreg USERNAME PASSWORD\n\n");
+            Console.WriteLine("Command list:");
+            Console.WriteLine("help");
+            Console.WriteLine("auth USERNAME PASSWORD");
+            Console.WriteLine("reg USERNAME PASSWORD\n\n");
         }
         public void Screen2_Help() {
-            Console.WriteLine("Command list:\nhelp\nuser-list\ndialogue-create USERNAME1 USERNAME2 USERNAME3 ... USERNAMEN\ndialogue-list\ndialogue-open DIALOGUE_NUMBER\n\n");
+            Console.WriteLine("Command list:");
+            Console.WriteLine("help");
+            Console.WriteLine("User List: ul");
+            Console.WriteLine("Create Dialogue: cd USERNAME1 USERNAME2 USERNAME3 ... USERNAMEN");
+            Console.WriteLine("Dialogue List: dl");
+            Console.WriteLine("Open Dialogue: od DIALOGUE_NUMBER\n\n");
         }
         public void Screen3_Help() {
             Console.WriteLine("Command list:\npress esc for exit\n\n");
@@ -144,16 +167,16 @@ namespace msg.client {
 
             var spl = inp.Split(" ");
             switch (spl[0].ToLower()) {
-                case "user-list":
+                case "ul":
                     Screen2_UserList(inp);
                     break;
-                case "dialogue-create":
+                case "cd":
                     Screen2_DialogueCreate(inp);
                     break;
-                case "dialogue-list":
+                case "dl":
                     Screen2_DialogueList(inp);
                     break;
-                case "dialogue-open":
+                case "od":
                     Screen2_DialogueOpen(inp);
                     break;
                 case "help":
@@ -183,12 +206,60 @@ namespace msg.client {
 
         }
         private void Screen2_DialogueOpen(string inp) {
+            var spl = inp.Split(" ").ToList();
+            if (spl.Count < 2) {
+                Console.WriteLine("Try that: \ndialogue-open DIALOGUE_NUMBER\n\n");
 
+            } else {
+                Screen = 4;
+                var index = int.Parse(spl[1]);
+                var D = Dialogues[index];
+                CurrentDialogueId = D.ID;
+                client.RMsgList(D.ID);
+            }
         }
 
         public void Screen3(string inp) {
-
+            Screen3_SendMsg(inp);
         }
 
+        private void Screen3_SendMsg(string text) {
+            client.SendMsg(CurrentDialogueId, text);
+            CurrentMessages.Add(new Message {
+                ID = Guid.NewGuid(),
+                Text = text,
+                SentAt = DateTime.Now,
+                SentBy = Profile.ID,
+                Dialogue = new Dialogue {
+                    ID = CurrentDialogueId
+                }
+            });
+            RePaintScreen3();
+        }
+
+
+        private void RePaintScreen3() {
+            MessageComparer comparer = new MessageComparer();
+            CurrentMessages.Sort(comparer);
+            foreach (var m in CurrentMessages) {
+                Console.WriteLine($"{m.SentAt.ToString("HH:mm:ss")} {GetUsernameById(m.SentBy),5}: {m.Text}");
+            }
+            Console.Write("> ");
+        }
+
+        private string GetUsernameById(Guid id) {
+            foreach (var p in users) {
+                if (p.ID == id)
+                    return p.Username;
+            }
+            return "noname";
+        }
+
+        class MessageComparer : IComparer<Message> {
+            // Compare two Persons.
+            public int Compare(Message m1, Message m2) {
+                return m1.SentAt.CompareTo(m2.SentAt);
+            }
+        }
     }
 }

@@ -22,4 +22,5 @@ UserListBlock
 RequestUserListBlock
 
 SendMsgBlock
-RequestMsgList
+RequestMsgListBlock
+MsgListBlock

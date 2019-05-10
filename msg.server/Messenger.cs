@@ -23,6 +23,7 @@ namespace msg.server {
             lock (lockObj) {
                 Sessions.Add(session);
             }
+            Console.WriteLine($"OPEN SESSION {session.SessionId}");
             session.Start();
         }
 
@@ -46,7 +47,7 @@ namespace msg.server {
         }
         public void CloseSession(Guid SessionId) {
             RecheckSession();
-            Console.WriteLine("CLOSE SESSION");
+            Console.WriteLine($"Close SESSION {SessionId}");
             lock (lockObj) {
                 Sessions = Sessions.FindAll((x) => x.SessionId != SessionId);
             }
