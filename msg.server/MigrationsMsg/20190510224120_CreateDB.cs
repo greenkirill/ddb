@@ -1,9 +1,9 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 
-namespace msg.server.MsgD1Migrations
+namespace msg.server.MigrationsMsg
 {
-    public partial class CreateMsgDatabase : Migration
+    public partial class CreateDB : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -19,17 +19,18 @@ namespace msg.server.MsgD1Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Member",
+                name: "Members",
                 columns: table => new
                 {
                     ID = table.Column<Guid>(nullable: false),
+                    MemberID = table.Column<Guid>(nullable: false),
                     DialogueID = table.Column<Guid>(nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Member", x => x.ID);
+                    table.PrimaryKey("PK_Members", x => x.ID);
                     table.ForeignKey(
-                        name: "FK_Member_Dialogues_DialogueID",
+                        name: "FK_Members_Dialogues_DialogueID",
                         column: x => x.DialogueID,
                         principalTable: "Dialogues",
                         principalColumn: "ID",
@@ -43,8 +44,8 @@ namespace msg.server.MsgD1Migrations
                     ID = table.Column<Guid>(nullable: false),
                     SentAt = table.Column<DateTime>(nullable: false),
                     SentBy = table.Column<Guid>(nullable: false),
-                    DialogueID = table.Column<Guid>(nullable: true),
-                    Text = table.Column<string>(nullable: true)
+                    DialogueID = table.Column<Guid>(nullable: false),
+                    Text = table.Column<string>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -54,12 +55,12 @@ namespace msg.server.MsgD1Migrations
                         column: x => x.DialogueID,
                         principalTable: "Dialogues",
                         principalColumn: "ID",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_Member_DialogueID",
-                table: "Member",
+                name: "IX_Members_DialogueID",
+                table: "Members",
                 column: "DialogueID");
 
             migrationBuilder.CreateIndex(
@@ -71,7 +72,7 @@ namespace msg.server.MsgD1Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "Member");
+                name: "Members");
 
             migrationBuilder.DropTable(
                 name: "Messages");

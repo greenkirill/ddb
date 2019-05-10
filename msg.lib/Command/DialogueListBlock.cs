@@ -31,7 +31,7 @@ namespace msg.lib {
                             members = d.Members.Select(m =>
 
                                 new DialogueListBlockModel.Dialog.Member {
-                                    ID = m.ID.ToString(),
+                                    ID = m.MemberID.ToString(),
                                     profile = new DialogueListBlockModel.Dialog.Member.Profile {
                                         ID = m.profile.ID.ToString(),
                                         Username = m.profile.Username
@@ -70,7 +70,7 @@ namespace msg.lib {
                     ID = Guid.Parse(d.ID),
                     Members = d.members.Select(m =>
                         new Member {
-                            ID = Guid.Parse(m.ID),
+                            MemberID = Guid.Parse(m.ID),
                             profile = new Profile {
                                 ID = Guid.Parse(m.profile.ID),
                                 Username = m.profile.Username,

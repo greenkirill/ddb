@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using msg.server;
 
-namespace msg.server.MsgD1Migrations
+namespace msg.server.MigrationsMsg
 {
     [DbContext(typeof(MSGContext))]
-    partial class MSGContextModelSnapshot : ModelSnapshot
+    [Migration("20190510224120_CreateDB")]
+    partial class CreateDB
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -36,11 +38,13 @@ namespace msg.server.MsgD1Migrations
 
                     b.Property<Guid?>("DialogueID");
 
+                    b.Property<Guid>("MemberID");
+
                     b.HasKey("ID");
 
                     b.HasIndex("DialogueID");
 
-                    b.ToTable("Member");
+                    b.ToTable("Members");
                 });
 
             modelBuilder.Entity("msg.lib.Message", b =>

@@ -3,17 +3,15 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
-using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using msg.server;
 
-namespace msg.server.MsgD1Migrations
+namespace msg.server.MigrationsMsg
 {
     [DbContext(typeof(MSGContext))]
-    [Migration("20190510121238_CreateMsgDatabase")]
-    partial class CreateMsgDatabase
+    partial class MSGContextModelSnapshot : ModelSnapshot
     {
-        protected override void BuildTargetModel(ModelBuilder modelBuilder)
+        protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -38,11 +36,13 @@ namespace msg.server.MsgD1Migrations
 
                     b.Property<Guid?>("DialogueID");
 
+                    b.Property<Guid>("MemberID");
+
                     b.HasKey("ID");
 
                     b.HasIndex("DialogueID");
 
-                    b.ToTable("Member");
+                    b.ToTable("Members");
                 });
 
             modelBuilder.Entity("msg.lib.Message", b =>
@@ -50,13 +50,14 @@ namespace msg.server.MsgD1Migrations
                     b.Property<Guid>("ID")
                         .ValueGeneratedOnAdd();
 
-                    b.Property<Guid?>("DialogueID");
+                    b.Property<Guid>("DialogueID");
 
                     b.Property<DateTime>("SentAt");
 
                     b.Property<Guid>("SentBy");
 
-                    b.Property<string>("Text");
+                    b.Property<string>("Text")
+                        .IsRequired();
 
                     b.HasKey("ID");
 
@@ -76,7 +77,8 @@ namespace msg.server.MsgD1Migrations
                 {
                     b.HasOne("msg.lib.Dialogue", "Dialogue")
                         .WithMany()
-                        .HasForeignKey("DialogueID");
+                        .HasForeignKey("DialogueID")
+                        .OnDelete(DeleteBehavior.Cascade);
                 });
 #pragma warning restore 612, 618
         }

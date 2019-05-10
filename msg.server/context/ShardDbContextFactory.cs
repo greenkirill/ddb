@@ -9,7 +9,7 @@ namespace msg.server {
 
 
         public MSGContext CreateDbContext(string[] args) {
-            return CreateDbContext("Data Source=.;Initial Catalog=msgD2;Integrated Security=True;");
+            return CreateDbContext("Data Source=.;Initial Catalog=msgD1;Integrated Security=True;");
         }
         
         public MSGContext CreateDbContext(string connectionString) {

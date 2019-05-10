@@ -31,7 +31,7 @@ namespace msg.lib {
                     DialogId = Message.Dialogue.ID.ToString(),
                     text = Message.Text,
                     members = Message.Dialogue.Members.Select(m => new MsgModel.Member {
-                        ID = m.ID.ToString(),
+                        ID = m.MemberID.ToString(),
                         Username = m.profile.Username
                     }).ToList()
                 }
@@ -44,7 +44,7 @@ namespace msg.lib {
                 var lm = new List<Member>();
                 foreach (var item in mmbrs) {
                     lm.Add(new Member {
-                        ID = Guid.Parse((string)item.ID),
+                        MemberID = Guid.Parse((string)item.ID),
                         profile = new Profile {
                             ID = Guid.Parse((string)item.ID),
                             Username = item.Username,

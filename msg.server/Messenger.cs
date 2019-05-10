@@ -34,7 +34,7 @@ namespace msg.server {
                     try {
                         if (session.SessionId != SessionId) {
                             foreach (var member in message.Dialogue.Members) {
-                                if (session.profile != null && member.ID == session.profile.ID) {
+                                if (session.profile != null && member.MemberID == session.profile.ID) {
                                     session.SendMsg(message);
                                 }
                             }

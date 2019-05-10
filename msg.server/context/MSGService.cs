@@ -62,7 +62,7 @@ namespace msg.server {
                 var profileIds = from p in profiles select p.ID;
                 var newDialogue = new Dialogue {
                     ID = Guid.NewGuid(),
-                    Members = profileIds.Select((x) => new Member { ID = x }).ToList()
+                    Members = profileIds.Select((x) => new Member { MemberID = x }).ToList()
                 };
                 using (var mContext = GetContextByGuid(newDialogue.ID)) {
                     mContext.Dialogues.Add(newDialogue);
@@ -77,14 +77,14 @@ namespace msg.server {
             foreach (var s in MSGShardsConnectionStrings) {
                 using (var context = MSGContextFactory.CreateDbContext(s)) {
                     D = D.Concat(
-                        context.Dialogues.Where(d => d.Members.Any(m => m.ID == id)).Include(x => x.Members)
+                        context.Dialogues.Where(d => d.Members.Any(m => m.MemberID == id)).Include(x => x.Members)
                     ).ToList();
                 }
             }
 
             foreach (var d in D) {
                 foreach (var m in d.Members) {
-                    m.profile = GetProfileById(m.ID);
+                    m.profile = GetProfileById(m.MemberID);
                 }
             }
             return D;
@@ -109,7 +109,7 @@ namespace msg.server {
                 context.Messages.Add(m);
                 context.SaveChanges();
                 foreach (var M in m.Dialogue.Members) {
-                    M.profile = GetProfileById(M.ID);
+                    M.profile = GetProfileById(M.MemberID);
                 }
                 return m;
             }
