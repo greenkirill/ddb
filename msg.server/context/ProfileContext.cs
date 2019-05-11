@@ -7,7 +7,7 @@ namespace msg.server {
         public DbSet<Profile> Profiles { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) {
-            optionsBuilder.UseSqlServer("Data Source=.;Initial Catalog=msgs;Integrated Security=True;");
+            optionsBuilder.UseSqlServer("Server=51.15.106.177;Database=msgs;User Id=sa;Password=yourStrong(!)Password;");
         }
         protected override void OnModelCreating(ModelBuilder builder) {
             builder.Entity<Profile>(entity => {

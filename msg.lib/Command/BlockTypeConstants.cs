@@ -2,10 +2,8 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace msg.lib
-{
-    public class BlockTypeConstants
-    {
+namespace msg.lib {
+    public class BlockTypeConstants {
         //public const byte EOFPieceType = 255;
         //public const byte HashPieceType = 4;
         public const byte MetaJson = 128;

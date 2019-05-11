@@ -67,49 +67,83 @@ namespace msg.server {
 
         private void RecieveRegister(int size) {
             var tBlock = bh.RecieveBlock(size, new RegisterBlock());
-            profile = mh.CreateProfile(tBlock.Username, tBlock.Password);
-            if (profile == null) {
-                client.Disconnect(false);
-                SessionClosed.Invoke(SessionId);
-            } else {
-                SendProfile(profile);
+            try {
+                profile = mh.CreateProfile(tBlock.Username, tBlock.Password);
+                if (profile == null) {
+                    client.Disconnect(false);
+                    SessionClosed.Invoke(SessionId);
+                } else {
+                    SendProfile(profile);
+                }
+
+            } catch (Exception e) {
+                SendError(e);
             }
         }
 
         private void RecieveAuth(int size) {
             var tBlock = bh.RecieveBlock(size, new AuthBlock());
-            profile = mh.FindProfile(tBlock.Username, tBlock.Password);
-            if (profile == null) {
-                client.Disconnect(false);
-                SessionClosed.Invoke(SessionId);
-            } else {
-                SendProfile(profile);
+            try {
+                profile = mh.FindProfile(tBlock.Username, tBlock.Password);
+                if (profile == null) {
+                    client.Disconnect(false);
+                    SessionClosed.Invoke(SessionId);
+                } else {
+                    SendProfile(profile);
+                }
+            } catch (Exception e) {
+                SendError(e);
             }
+
         }
         private void RecieveRequestUserList(int size) {
             var tBlock = bh.RecieveBlock(size, new RequestUserListBlock());
-            var users = mh.GetAllProfiles();
-            SendUserList(users);
 
+            try {
+                var users = mh.GetAllProfiles();
+                SendUserList(users);
+            } catch (Exception e) {
+                SendError(e);
+            }
         }
         private void RecieveRequestDialogueList(int size) {
             var tBlock = bh.RecieveBlock(size, new RequestDialogueList());
-            var ds = mh.GetDialoguesByMemberId(profile.ID);
-            SendDialogueList(ds);
+
+            try {
+                var ds = mh.GetDialoguesByMemberId(profile.ID);
+                SendDialogueList(ds);
+            } catch (Exception e) {
+                SendError(e);
+            }
         }
         private void RecieveRequestMsgList(int size) {
             var tBlock = bh.RecieveBlock(size, new RequestMsgList());
-            var ds = mh.GetMsgList(tBlock.DialogId, 0, 30);
-            SendMsgList(ds);
+
+            try {
+                var ds = mh.GetMsgList(tBlock.DialogId, 0, 30);
+                SendMsgList(ds);
+            } catch (Exception e) {
+                SendError(e);
+            }
         }
         private void RecieveMsg(int size) {
             var tBlock = bh.RecieveBlock(size, new CMsgBlock());
-            var m = mh.SendMessage(tBlock.DialogId, profile.ID, tBlock.text);
-            MsgSended.Invoke(SessionId, m);
+
+            try {
+                var m = mh.SendMessage(tBlock.DialogId, profile.ID, tBlock.text);
+                MsgSended.Invoke(SessionId, m);
+            } catch (Exception e) {
+                SendError(e);
+            }
         }
         private void RecieveDialogueCreate(int size) {
             var tBlock = bh.RecieveBlock(size, new DialogueCreateBlock());
-            mh.CreateDialogue(tBlock.Users, profile.Username);
+
+            try {
+                mh.CreateDialogue(tBlock.Users, profile.Username);
+            } catch (Exception e) {
+                SendError(e);
+            }
         }
 
         public void SendProfile(Profile profile) {
@@ -131,6 +165,11 @@ namespace msg.server {
 
         public void SendMsg(Message msg) {
             var rb = new MsgBlock(msg);
+            bh.Send(rb);
+        }
+
+        private void SendError(Exception e) {
+            var rb = new ErrorBlock("Something wrong with db. unlucky");
             bh.Send(rb);
         }
 
