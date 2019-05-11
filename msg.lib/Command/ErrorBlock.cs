@@ -1,5 +1,7 @@
+using System;
+
 namespace msg.lib {
-    public class ErrorBlock {
+    public class ErrorBlock : MetaJson {
         public class ErrorBlockModel {
             public string Text;
         }
@@ -7,18 +9,28 @@ namespace msg.lib {
         public new const byte Type = BlockTypeConstants.ErrorBlock;
 
         
-        public MsgBlock(Excception e) :
+        public ErrorBlock(Exception e) :
             base(
                 new ErrorBlockModel {
                     Text = e.ToString()
                 }
                 ) { }
-        public MsgBlock(string e) :
+        public ErrorBlock(string e) :
             base(
                 new ErrorBlockModel {
                     Text = e
                 }
                 ) { }
-        public MsgBlock() : base() { }
+        public ErrorBlock() : base() { }
+
+        public string Text {
+            get {
+                return DJson.Text;
+            }
+        }
+        
+        public override byte[] GetBytes() {
+            return GetBytes(ErrorBlock.Type);
+        }
     }
 }

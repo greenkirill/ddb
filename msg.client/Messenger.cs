@@ -23,6 +23,8 @@ namespace msg.client {
 
             client.MsgRecieved += MsgRecieve;
 
+            client.ErrorRecieved += ErrorRecieve;
+
             clientTask = new Task(client.Start);
             clientTask.Start();
 
@@ -43,6 +45,11 @@ namespace msg.client {
 
         public ManualResetEvent wait1Recieve = new ManualResetEvent(false);
 
+        public void ErrorRecieve(string text) {
+            if(Screen != 3) {
+                Console.WriteLine($"Error from server: {text}");
+            }
+        }
         public void ProfileRecieve(Profile Profile) {
             this.Profile = Profile;
             ToScreen2();

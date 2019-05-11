@@ -34,6 +34,8 @@ namespace msg.client {
         public event MsgListEvent MsgListRecieved;
         public delegate void MsgEvent(Message Message);
         public event MsgEvent MsgRecieved;
+        public delegate void ErrorEvent(string text);
+        public event ErrorEvent ErrorRecieved;
 
         private BlockHelper bh;
 
@@ -138,6 +140,7 @@ namespace msg.client {
                 while ((header.type != 0 || header.size != 0) && header.type != BlockTypeConstants.ENDConnect) {
                     switch (header.type) {
                         case BlockTypeConstants.ErrorBlock:
+                            RecievedError(header.size);
                             break;
                         case BlockTypeConstants.ProfileBlock:
                             RecieveProfile(header.size);
@@ -195,6 +198,10 @@ namespace msg.client {
         public void RecievedMsg(int size) {
             var tBlock = bh.RecieveBlock(size, new MsgBlock());
             MsgRecieved.Invoke(tBlock.Message);
+        }
+        public void RecievedError(int size) {
+            var tBlock = bh.RecieveBlock(size, new ErrorBlock());
+            ErrorRecieved.Invoke(tBlock.Text);
         }
     }
 
